@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://cdn.bootcss.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="/static/js/echarts.min.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <div>
+        预测：
+        {volist name="forecast" id="vo"}
+        <span>{$vo}</span>
+        {/volist}
+        <span>sum1：{$sum1}</span>
+        <span>sum2：{$sum2}</span>
+    </div>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">期数</th>
+            <th scope="col">num1</th>
+            <th scope="col">num2</th>
+            <th scope="col">num3</th>
+            <th scope="col">结果</th>
+            <th scope="col">单/双</th>
+            <th scope="col">大/小</th>
+            <th scope="col">中/边</th>
+        </tr>
+        </thead>
+        <tbody>
+        {volist name="list" id="vo"}
+        <tr>
+            <td>{$vo.periods}</td>
+            <td>{$vo.num1}</td>
+            <td>{$vo.num2}</td>
+            <td>{$vo.num3}</td>
+            <td>{$vo.sum}</td>
+            <td {if $vo.danshuang == '单'}style="color:red;"{/if}>{$vo.danshuang}</td>
+            <td {if $vo.daxiao == '大'}style="color:red;"{/if}>{$vo.daxiao}</td>
+            <td {if $vo.zhongbian == '中'}style="color:red;"{/if}>{$vo.zhongbian}</td>
+        </tr>
+        {/volist}
+        </tbody>
+    </table>
+
+<div id="main" style="width: 100%;height:800px;"></div>
+</div>
+<audio src="/static/2.mp3" id="audio" {if $forecast}autoplay="autoplay"{/if}></audio>
+
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
+
+    // 指定图表的配置项和数据
+    var option = {
+        title: {
+            text: '未来一周气温变化',
+            subtext: '纯属虚构'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        toolbox: {
+            show: true,
+            feature: {
+                dataZoom: {
+                    yAxisIndex: 'none'
+                },
+                dataView: {readOnly: false},
+                magicType: {type: ['line', 'bar']},
+                restore: {},
+                saveAsImage: {}
+            }
+        },
+        xAxis: {
+            type: 'category',
+            data: [{$xAxis}]
+        },
+        yAxis: {
+            type: 'value',
+            splitNumber:28
+        },
+        series: {
+                name: '最高气温',
+                type: 'line',
+                smooth:true,
+                data: [{$arr}],
+            markLine: {
+                silent: true,
+                data: [{
+                    yAxis: 10
+                }, {
+                    yAxis: 17
+                }]
+            }
+            }
+        
+    };
+
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+</body>
+</html>

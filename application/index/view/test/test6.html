@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width, target-densitydpi=high-dpi">
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <link href="https://cdn.bootcss.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container-fluid">
+<p>
+    {volist name="arr" id="vo"}
+        {if $vo>10}
+            <span style="background:red;">{$vo}</span>
+        {else}
+            <span>{$vo}</span>
+        {/if}
+    {/volist}
+</p>
+<div>
+    <p>
+        {if $switch}
+        投注中
+        {else}
+        暂停投注
+        {/if}
+    </p>
+    <button class="btn btn-success" id="start">开始投注</button>
+    <button class="btn btn-danger" id="stop">停止投注</button>
+</div>
+
+<script>
+    setTimeout(function () {
+        window.location.reload();
+    },60000);
+    
+    $(function () {
+        $('#start').click(function(){
+            $.get('start', function(data) {
+                
+            });
+        })
+
+        $('#stop').click(function () {
+            $.get('stop', function(data) {
+                /*optional stuff to do after success */
+            });
+        })
+    })
+</script>
+</body>
+</html>

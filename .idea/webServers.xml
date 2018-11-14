@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="0a2e42af-d5f3-4b0f-8233-76523dfc186c" name="线上" url="http://dandan.wxbuluo.com">
+        <fileTransfer host="dandan.wxbuluo.com" port="22" rootFolder="/www/web/dandan_wxbuluo_com/public_html" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
