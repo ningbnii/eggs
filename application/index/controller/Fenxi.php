@@ -8,10 +8,22 @@
 
 namespace app\index\controller;
 
+use app\index\model\Forecast;
 use app\index\model\Source;
+use think\Db;
 
 class Fenxi
 {
+    public function index()
+    {
+        $this->test2();
+        $list = Db::name('forecast')->alias('f')
+            ->field('s.periods,f.mode1')
+            ->join('source s','s.id=f.source_id','left')
+            ->order('f.id desc')
+            ->select();
+        return view('index',['list'=>$list,'switch'=>cache('switch')]);
+    }
     /**
      * @Notes: 分析数据是否完整
      * @Author: chenning[296720094@qq.com]
@@ -40,6 +52,21 @@ class Fenxi
 
         }
         dump($arr);
+
+    }
+
+    /**
+     * 各个模式的判断是否正确
+     */
+    public function test2()
+    {
+        $source = Source::all();
+        $count = count($source);
+        foreach ($source as $k=>$v){
+            if($k<$count-3){
+                Forecast::checkModel1($source[$k+2],$source[$k+1],$source[$k],$source[$k+3]);
+            }
+        }
 
     }
 }

@@ -19,6 +19,22 @@ class Mode
     {
         self::$curl = self::getCurl();
     }
+
+    /**
+     * 获取模式1的判断组合类型
+     */
+    public static function getMode1Type($first,$second,$third)
+    {
+
+        $firstNum = $first->num3 + $second->num3;
+        $secondNum = $second->num2 + $third->num2;
+        $thirdNum = $third->num3;
+        // 尾数求和
+        $sum = getMantissa($firstNum) + getMantissa($secondNum) + getMantissa($thirdNum);
+        // 判断组合类型
+        $type = getForecastType($sum);
+        return $type;
+    }
     /**
      * @Notes: 模式1
      * @Author: chenning[296720094@qq.com]
@@ -28,13 +44,7 @@ class Mode
     public static function mode1()
     {
         $list = Source::getLastThreeRecord();
-        $first = $list[0]->num3 + $list[1]->num3;
-        $second = $list[1]->num2 + $list[2]->num2;
-        $third = $list[2]->num3;
-        // 尾数求和
-        $sum = getMantissa($first) + getMantissa($second) + getMantissa($third);
-        // 判断组合类型
-        $type = getForecastType($sum);
+        $type = self::getMode1Type($list[0],$list[1],$list[2]);
         // 获取组合投注模式
         $touzhu = self::getCombination($type);
         // 计算总的投注金额
