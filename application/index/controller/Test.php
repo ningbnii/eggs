@@ -725,56 +725,6 @@ class Test extends Controller
         echo $forecast;
     }
 
-    public function test20()
-    {
-        cache('times',null);
-    }
-
-    /**
-     * 自动投注
-     */
-    public function auto()
-    {
-        $cookie = cache('cookie');
-        if (!$cookie) {
-            $cookie = 'CFDB0042FF0E06A00BAC9097444DA5713A154D6E414AA0A16C8BB589D7664FDF2A9D2AEA8901036DA185961B18A50381D6B1E8A5FE73D3270FC9A8C4961CCD0A8C0D70CF2D79A3ED06B589E44B15838B4532558E3924BC74930C7B84EAD2BB29E2380F8D8D4D2BB04498F2C302405010854081AFFACF8175CCBD5266309141B40EDDD11A';
-            cache('cookie', $cookie);
-        }
-        $curl = new Curl();
-        $curl->setCookie('.ADWASPX7A5C561934E_PCEGGS', $cookie);
-
-        $last = Source::order('id desc')->find();
-        $lid = 133738 + $last->periods + 1;
-        $lid = 1072604;
-        $curl->setHeader('Referer', 'http://www.pceggs.com/play/pg28Insert.aspx?LID=' . $lid);
-        $arr = [
-            'CTIME' => '2018-11-04 20:00',
-            'ALLSMONEY' => '1,,,,,,,,,,,,,,,,,,,,,,,,,,,',
-            'isdb_p' => '0',
-            'SMONEYSUM' => '1',
-            'SMONEYY' => 'ALD',
-            'Cheat' => 'CAE',
-            '_' => time() * 1000,
-        ];
-
-        $result = $curl->get('http://www.pceggs.com/play/pg28Insert_ajax.ashx?LID=' . $lid . '&' . http_build_query($arr));
-        dump($result);
-        exit;
-        $responseHeaders = $curl->response_headers;
-        foreach ($responseHeaders as $key => $value) {
-            if (strpos($value, 'Set-Cookie') !== false) {
-                $str = trim(substr($value, 11));
-                $arr = explode(';', $str);
-                foreach ($arr as $key => $v) {
-                    $temp = explode('=', trim($v));
-                    if ($temp[0] == '.ADWASPX7A5C561934E_PCEGGS') {
-                        cache('cookie', $temp[1]);
-                    }
-                }
-            }
-        }
-    }
-
     public function start()
     {
         cache('switch', true);

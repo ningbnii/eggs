@@ -128,6 +128,7 @@ class Index
         // 自动开奖
         $lid = substr(trim($data[0]['lid']), 13, 7);
         if (cache('lid') != $lid && cache('switch')) {
+
             $modeFunc = 'mode' . cache('mode');
             if (method_exists(new Mode(), $modeFunc)) {
                 $modeData = Mode::$modeFunc();
