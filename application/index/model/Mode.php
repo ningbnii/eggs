@@ -36,10 +36,12 @@ class Mode
         // 判断组合类型
         $type = getForecastType($sum);
         // 获取组合投注模式
-        $mode = self::getCombination($type);
+        $touzhu = self::getCombination($type);
+        // 计算总的投注金额
+        $sumMoney = self::getSumMoney($touzhu);
         return [
-            'touzhu' => '11111',
-            'sumMoney' => 123
+            'touzhu' => $touzhu,
+            'sumMoney' => $sumMoney
         ];
     }
 
@@ -73,6 +75,25 @@ class Mode
         $modeData = self::$curl->get($modeUrl);
         $touzhu = $modeData->response;
         return $touzhu;
+    }
+
+    /**
+     * @Notes: 获取总的投注金额
+     * @Author: chenning[296720094@qq.com]
+     * @Date: 2018/11/14
+     * @Time: 17:40
+     * @param $touzhu
+     */
+    public static function getSumMoney($touzhu)
+    {
+        $touzhuArr = explode(',',$touzhu);
+        $sumMoney = 0;
+        foreach ($touzhuArr as &$v){
+            if($v){
+                $sumMoney += $v;
+            }
+        }
+        return $sumMoney;
     }
 
     /**
