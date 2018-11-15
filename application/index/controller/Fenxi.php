@@ -11,6 +11,7 @@ namespace app\index\controller;
 use app\index\model\Forecast;
 use app\index\model\Source;
 use think\Db;
+use think\Request;
 
 class Fenxi
 {
@@ -22,7 +23,7 @@ class Fenxi
             ->join('source s','s.id=f.source_id','left')
             ->order('f.id desc')
             ->select();
-        return view('index',['list'=>$list,'switch'=>cache('switch')]);
+        return view('index',['list'=>$list,'switch'=>cache('switch'),'mode'=>cache('mode')]);
     }
     /**
      * @Notes: 分析数据是否完整
@@ -70,5 +71,13 @@ class Fenxi
         }
         $forecast = new Forecast();
         $forecast->saveAll($data);
+    }
+
+    public function setMode()
+    {
+        if(Request::instance()->isPost()){
+            $mode = input('mode');
+            cache('mode',$mode);
+        }
     }
 }
