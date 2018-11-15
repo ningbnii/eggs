@@ -18,7 +18,7 @@ class Fenxi
     {
         $this->test2();
         $list = Db::name('forecast')->alias('f')
-            ->field('s.periods,f.mode1')
+            ->field('s.periods,mode1,mode2')
             ->join('source s','s.id=f.source_id','left')
             ->order('f.id desc')
             ->select();
@@ -62,11 +62,13 @@ class Fenxi
     {
         $source = Source::all();
         $count = count($source);
+        $data= [];
         foreach ($source as $k=>$v){
             if($k<$count-3){
-                Forecast::checkModel1($source[$k+2],$source[$k+1],$source[$k],$source[$k+3]);
+                $data[] =Forecast::checkMode($source[$k+2],$source[$k+1],$source[$k],$source[$k+3]);
             }
         }
-
+        $forecast = new Forecast();
+        $forecast->saveAll($data);
     }
 }

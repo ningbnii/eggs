@@ -23,7 +23,7 @@ class Mode
     /**
      * 获取模式1的判断组合类型
      */
-    public static function getMode1Type($first,$second,$third)
+    public static function getMode1Type($first, $second, $third)
     {
 
         $firstNum = $first->num3 + $second->num3;
@@ -35,6 +35,7 @@ class Mode
         $type = getForecastType($sum);
         return $type;
     }
+
     /**
      * @Notes: 模式1
      * @Author: chenning[296720094@qq.com]
@@ -44,7 +45,7 @@ class Mode
     public static function mode1()
     {
         $list = Source::getLastThreeRecord();
-        $type = self::getMode1Type($list[0],$list[1],$list[2]);
+        $type = self::getMode1Type($list[0], $list[1], $list[2]);
         // 获取组合投注模式
         $touzhu = self::getCombination($type);
         // 计算总的投注金额
@@ -56,6 +57,27 @@ class Mode
     }
 
     /**
+     * @Notes: 获取模式2的组合类型
+     * @Author: chenning[296720094@qq.com]
+     * @Date: 2018/11/15
+     * @Time: 9:36
+     * @param $first
+     * @param $second
+     * @param $third
+     */
+    public static function getMode2Type($first, $second, $third)
+    {
+        $firstNum = $first->num1 + $second->num2 + $third->num1;
+        $secondNum = $first->num3 + $second->num2 + $third->num3;
+        $thirdNum = $second->sum;
+        // 尾数求和
+        $sum = getMantissa($firstNum) + getMantissa($secondNum) + getMantissa($thirdNum);
+        // 组合类型
+        $type = getForecastType($sum);
+        return $type;
+    }
+
+    /**
      * @Notes: 模式2
      * @Author: chenning[296720094@qq.com]
      * @Date: 2018/11/14
@@ -63,7 +85,16 @@ class Mode
      */
     public static function mode2()
     {
-
+        $list = Source::getLastThreeRecord();
+        $type = self::getMode2Type($list[0], $list[1], $list[2]);
+        // 获取组合投注模式
+        $touzhu = self::getCombination($type);
+        // 计算总的投注额
+        $sumMoney = self::getSumMoney($touzhu);
+        return [
+            'touzhu' => $touzhu,
+            'sumMoney' => $sumMoney
+        ];
     }
 
     /**
@@ -96,10 +127,10 @@ class Mode
      */
     public static function getSumMoney($touzhu)
     {
-        $touzhuArr = explode(',',$touzhu);
+        $touzhuArr = explode(',', $touzhu);
         $sumMoney = 0;
-        foreach ($touzhuArr as &$v){
-            if($v){
+        foreach ($touzhuArr as &$v) {
+            if ($v) {
                 $sumMoney += $v;
             }
         }
