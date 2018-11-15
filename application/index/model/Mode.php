@@ -97,6 +97,43 @@ class Mode
         ];
     }
 
+    public static function getMode3Type($first,$second,$third)
+    {
+        $sum = $first->num1 * 100 + $second->num1 * 10 + $third->num1 + $first->num3 * 10 + $second->num2 - $third->num2;
+        $sum = str_split($sum);
+        $lastTotal = 0;
+        foreach ($sum as $v){
+            $lastTotal += $v;
+        }
+        $forecast = getForecastType($lastTotal);
+        if ($forecast == '大单') {
+            $forecast = '小双';
+        }
+        if ($forecast == '小单') {
+            $forecast = '大双';
+        }
+        if ($forecast == '大双') {
+            $forecast = '小单';
+        }
+        if ($forecast == '小双') {
+            $forecast = '大单';
+        }
+        return $forecast;
+    }
+
+
+    public static function mode3()
+    {
+        $list = Source::getLastThreeRecord();
+        $type = self::getMode3Type($list[0],$list[1],$list[2]);
+        $touzhu = self::getCombination($type);
+        $sumMoney = self::getSumMoney($touzhu);
+        return [
+            'touzhu'=>$touzhu,
+            'sumMoney'=>$sumMoney
+        ];
+    }
+
     /**
      * @Notes: 获取组合投注模式
      * @Author: chenning[296720094@qq.com]

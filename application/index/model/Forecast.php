@@ -30,47 +30,33 @@ class Forecast extends Model
         if(!$hasOne){
             $data = [
                 'source_id'=>$real->id,
-                'mode1'=>self::checkMode1($first,$second,$third,$real),
-                'mode2'=>self::checkMode2($first,$second,$third,$real)
+                'mode1'=>self::getForecastType($first,$second,$third,$real,1),
+                'mode2'=>self::getForecastType($first,$second,$third,$real,2),
+                'mode3'=>self::getForecastType($first,$second,$third,$real,3),
             ];
         }
         return $data;
     }
     /**
-     * 模式1的正确性
+     * 模式的正确性
      * @param $first
      * @param $second
      * @param $third
      * @param $real
      */
-    public static function checkMode1($first,$second,$third,$real)
+    public static function getForecastType($first,$second,$third,$real,$mode)
     {
-        // 预测的组合
-        $forecast = ch2arr(Mode::getMode1Type($first,$second,$third));
-        // 判断实际值是不是包含在组合中
-        $shiji = ch2arr(getForecastType($real->sum));
-        $flag = false;
-        foreach ($shiji as $v){
-            if(in_array($v,$forecast)){
-                $flag = true;
-            }
+        switch ($mode){
+            case 1:
+                $forecast = ch2arr(Mode::getMode1Type($first,$second,$third));
+                break;
+            case 2:
+                $forecast = ch2arr(Mode::getMode2Type($first,$second,$third));
+                break;
+            case 3:
+                $forecast = ch2arr(Mode::getMode3Type($first,$second,$third));
+                break;
         }
-        return $flag ? 1 : 0;
-    }
-
-    /**
-     * @Notes: 模式2的正确性
-     * @Author: chenning[296720094@qq.com]
-     * @Date: 2018/11/15
-     * @Time: 14:29
-     * @param $first
-     * @param $second
-     * @param $third
-     * @param $real
-     */
-    public static function checkMode2($first,$second,$third,$real)
-    {
-        $forecast = ch2arr(Mode::getMode2Type($first,$second,$third));
         // 判断实际值是不是包含在组合中
         $shiji = ch2arr(getForecastType($real->sum));
         $flag = false;
