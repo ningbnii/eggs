@@ -147,6 +147,7 @@ class Index
                 $result = $curl->get('http://www.pceggs.com/play/pg28Insert_ajax.ashx?LID=' . $lid . '&' . http_build_query($arr));
                 if (json_decode($result->response)->status == 1) {
                     cache('lid', $lid);
+                    cache('switch',false);
                 }
             }
         }
