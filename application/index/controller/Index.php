@@ -2,6 +2,7 @@
 
 namespace app\index\controller;
 
+use app\index\model\Forecast;
 use app\index\model\Mode;
 use app\index\model\Source;
 
@@ -125,6 +126,10 @@ class Index
             $source->save();
         }
 
+        // 模式4如果错误，停止投注
+        if(!Forecast::getLastStatus('mode4')){
+            cache('switch',false);
+        }
         // 自动开奖
         $lid = substr(trim($data[0]['lid']), 13, 7);
         if (cache('lid') != $lid && cache('switch')) {
@@ -147,7 +152,7 @@ class Index
                 $result = $curl->get('http://www.pceggs.com/play/pg28Insert_ajax.ashx?LID=' . $lid . '&' . http_build_query($arr));
                 if (json_decode($result->response)->status == 1) {
                     cache('lid', $lid);
-                    cache('switch',false);
+//                    cache('switch',false);
                 }
             }
         }

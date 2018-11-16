@@ -85,4 +85,16 @@ class Source extends Model
         $list = Source::order('id desc')->limit(3)->select();
         return $list;
     }
+
+    /**
+     * @Notes: 获取最后一个
+     * @Author: chenning[296720094@qq.com]
+     * @Date: 2018/11/16
+     * @Time: 11:44
+     */
+    public static function getLastOne()
+    {
+        $data = self::order('id desc')->find();
+        return $data;
+    }
 }

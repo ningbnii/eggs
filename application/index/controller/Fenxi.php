@@ -19,10 +19,11 @@ class Fenxi
     {
         $this->test2();
         $list = Db::name('forecast')->alias('f')
-            ->field('s.periods,mode1,mode2,mode3')
+            ->field('s.periods,mode1,mode2,mode3,mode4')
             ->join('source s','s.id=f.source_id','left')
             ->order('f.id desc')
             ->select();
+
         return view('index',['list'=>$list,'switch'=>cache('switch'),'mode'=>cache('mode')]);
     }
     /**
@@ -73,6 +74,7 @@ class Fenxi
         $forecast->saveAll($data);
     }
 
+
     public function setMode()
     {
         if(Request::instance()->isPost()){
@@ -81,31 +83,4 @@ class Fenxi
         }
     }
 
-
-    public function test3()
-    {
-        $list = Forecast::all();
-        $right = 0;
-        $arr = [];
-        foreach ($list as $k=>$v){
-            // 模式1间隔
-            if($v->mode1== 1){
-                $right ++;
-            }else{
-                $arr[] = $right;
-                $right =0;
-            }
-        }
-        $temp = 0;
-        $tempArr = [];
-        foreach ($arr as $v){
-            if($v<3){
-                $temp+=$v;
-            }else{
-                $tempArr[] = $temp;
-                $temp = 0;
-            }
-        }
-        dump($tempArr);
-    }
 }

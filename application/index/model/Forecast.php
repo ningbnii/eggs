@@ -33,6 +33,7 @@ class Forecast extends Model
                 'mode1'=>self::getForecastType($first,$second,$third,$real,1),
                 'mode2'=>self::getForecastType($first,$second,$third,$real,2),
                 'mode3'=>self::getForecastType($first,$second,$third,$real,3),
+                'mode4'=>self::getForecastType4($first,$real),
             ];
         }
         return $data;
@@ -66,5 +67,30 @@ class Forecast extends Model
             }
         }
         return $flag ? 1 : 0;
+    }
+
+    /**
+     * @Notes: 杀5余正确性
+     * @Author: chenning[296720094@qq.com]
+     * @Date: 2018/11/16
+     * @Time: 13:07
+     */
+    public static function getForecastType4($first,$real)
+    {
+        $remainder = $first->sum % 4;
+        $shiji = $real->sum % 5;
+        return $remainder == $shiji ? 0 : 1;
+    }
+
+    /**
+     * @Notes: 上一期模式的正确性
+     * @Author: chenning[296720094@qq.com]
+     * @Date: 2018/11/16
+     * @Time: 15:45
+     */
+    public static function getLastStatus($mode)
+    {
+        $data = self::order('id desc')->find();
+        return $data->$mode;
     }
 }

@@ -22,9 +22,10 @@
     <thead>
     <tr>
         <th scope="col">期数</th>
-        <th scope="col"><button class="btn" id="mode1">mode1</button></th>
-        <th scope="col"><button class="btn" id="mode2">mode2</button></th>
-        <th scope="col"><button class="btn" id="mode3">mode3</button></th>
+        <th scope="col"><button class="btn btn-sm" id="mode1">mode1</button></th>
+        <th scope="col"><button class="btn btn-sm" id="mode2">mode2</button></th>
+        <th scope="col"><button class="btn btn-sm" id="mode3">mode3</button></th>
+        <th scope="col"><button class="btn btn-sm" id="mode4">mode4</button></th>
     </tr>
     </thead>
     <tbody>
@@ -47,6 +48,13 @@
         </td>
         <td>
             {if $vo.mode3== 1}
+            <button class="btn btn-success">对</button>
+            {else}
+            <button class="btn btn-danger">错</button>
+            {/if}
+        </td>
+        <td>
+            {if $vo.mode4== 1}
             <button class="btn btn-success">对</button>
             {else}
             <button class="btn btn-danger">错</button>
@@ -87,6 +95,11 @@
         })
         $('#mode3').click(function(){
             $.post("{:url('fenxi/setMode')}",{mode:3},function(data){
+                location.reload();
+            })
+        })
+        $('#mode4').click(function(){
+            $.post("{:url('fenxi/setMode')}",{mode:4},function(data){
                 location.reload();
             })
         })

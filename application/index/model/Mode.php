@@ -135,6 +135,47 @@ class Mode
     }
 
     /**
+     * @Notes: 杀5余
+     * @Author: chenning[296720094@qq.com]
+     * @Date: 2018/11/16
+     * @Time: 11:23
+     */
+    public static function mode4()
+    {
+        $last = Source::getLastOne();
+        // 计算4余
+        $remainder = $last->sum % 4;
+        $touzhu = self::getFive($remainder);
+        $sumMoney = self::getSumMoney($touzhu);
+        return [
+            'touzhu'=>$touzhu,
+            'sumMoney'=>$sumMoney
+        ];
+    }
+
+    /**
+     * @Notes: 获取杀5余的投注
+     * @Author: chenning[296720094@qq.com]
+     * @Date: 2018/11/16
+     * @Time: 12:58
+     * @param $remainder
+     */
+    public static function getFive($remainder)
+    {
+        $modeArr = [
+            '0'=>3,
+            '1'=>5,
+            '2'=>2,
+            '3'=>4,
+            '4'=>1
+        ];
+        $modeUrl = 'http://www.pceggs.com/play/pg28mode.aspx?mode=' . $modeArr[$remainder];
+        $modeData = self::$curl->get($modeUrl);
+        $touzhu = $modeData->response;
+        return $touzhu;
+    }
+
+    /**
      * @Notes: 获取组合投注模式
      * @Author: chenning[296720094@qq.com]
      * @Date: 2018/11/14
