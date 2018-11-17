@@ -11,6 +11,7 @@ namespace app\index\controller;
 use app\index\model\Forecast;
 use app\index\model\Source;
 use think\Db;
+use think\Request;
 
 class Fenxi
 {
@@ -18,11 +19,12 @@ class Fenxi
     {
         $this->test2();
         $list = Db::name('forecast')->alias('f')
-            ->field('s.periods,f.mode1')
+            ->field('s.periods,mode1,mode2,mode3,mode4')
             ->join('source s','s.id=f.source_id','left')
             ->order('f.id desc')
             ->select();
-        return view('index',['list'=>$list,'switch'=>cache('switch')]);
+
+        return view('index',['list'=>$list,'switch'=>cache('switch'),'mode'=>cache('mode')]);
     }
     /**
      * @Notes: 分析数据是否完整
@@ -62,11 +64,23 @@ class Fenxi
     {
         $source = Source::all();
         $count = count($source);
+        $data= [];
         foreach ($source as $k=>$v){
             if($k<$count-3){
-                Forecast::checkModel1($source[$k+2],$source[$k+1],$source[$k],$source[$k+3]);
+                $data[] =Forecast::checkMode($source[$k+2],$source[$k+1],$source[$k],$source[$k+3]);
             }
         }
-
+        $forecast = new Forecast();
+        $forecast->saveAll($data);
     }
+
+
+    public function setMode()
+    {
+        if(Request::instance()->isPost()){
+            $mode = input('mode');
+            cache('mode',$mode);
+        }
+    }
+
 }

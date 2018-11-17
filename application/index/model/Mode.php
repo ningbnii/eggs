@@ -23,7 +23,7 @@ class Mode
     /**
      * 获取模式1的判断组合类型
      */
-    public static function getMode1Type($first,$second,$third)
+    public static function getMode1Type($first, $second, $third)
     {
 
         $firstNum = $first->num3 + $second->num3;
@@ -35,6 +35,7 @@ class Mode
         $type = getForecastType($sum);
         return $type;
     }
+
     /**
      * @Notes: 模式1
      * @Author: chenning[296720094@qq.com]
@@ -44,7 +45,7 @@ class Mode
     public static function mode1()
     {
         $list = Source::getLastThreeRecord();
-        $type = self::getMode1Type($list[0],$list[1],$list[2]);
+        $type = self::getMode1Type($list[0], $list[1], $list[2]);
         // 获取组合投注模式
         $touzhu = self::getCombination($type);
         // 计算总的投注金额
@@ -56,6 +57,27 @@ class Mode
     }
 
     /**
+     * @Notes: 获取模式2的组合类型
+     * @Author: chenning[296720094@qq.com]
+     * @Date: 2018/11/15
+     * @Time: 9:36
+     * @param $first
+     * @param $second
+     * @param $third
+     */
+    public static function getMode2Type($first, $second, $third)
+    {
+        $firstNum = $first->num1 + $second->num2 + $third->num1;
+        $secondNum = $first->num3 + $second->num2 + $third->num3;
+        $thirdNum = $second->sum;
+        // 尾数求和
+        $sum = getMantissa($firstNum) + getMantissa($secondNum) + getMantissa($thirdNum);
+        // 组合类型
+        $type = getForecastType($sum);
+        return $type;
+    }
+
+    /**
      * @Notes: 模式2
      * @Author: chenning[296720094@qq.com]
      * @Date: 2018/11/14
@@ -63,7 +85,94 @@ class Mode
      */
     public static function mode2()
     {
+        $list = Source::getLastThreeRecord();
+        $type = self::getMode2Type($list[0], $list[1], $list[2]);
+        // 获取组合投注模式
+        $touzhu = self::getCombination($type);
+        // 计算总的投注额
+        $sumMoney = self::getSumMoney($touzhu);
+        return [
+            'touzhu' => $touzhu,
+            'sumMoney' => $sumMoney
+        ];
+    }
 
+    public static function getMode3Type($first,$second,$third)
+    {
+        $sum = $first->num1 * 100 + $second->num1 * 10 + $third->num1 + $first->num3 * 10 + $second->num2 - $third->num2;
+        $sum = str_split($sum);
+        $lastTotal = 0;
+        foreach ($sum as $v){
+            $lastTotal += $v;
+        }
+        $forecast = getForecastType($lastTotal);
+        if ($forecast == '大单') {
+            $forecast = '小双';
+        }
+        if ($forecast == '小单') {
+            $forecast = '大双';
+        }
+        if ($forecast == '大双') {
+            $forecast = '小单';
+        }
+        if ($forecast == '小双') {
+            $forecast = '大单';
+        }
+        return $forecast;
+    }
+
+
+    public static function mode3()
+    {
+        $list = Source::getLastThreeRecord();
+        $type = self::getMode3Type($list[0],$list[1],$list[2]);
+        $touzhu = self::getCombination($type);
+        $sumMoney = self::getSumMoney($touzhu);
+        return [
+            'touzhu'=>$touzhu,
+            'sumMoney'=>$sumMoney
+        ];
+    }
+
+    /**
+     * @Notes: 杀5余
+     * @Author: chenning[296720094@qq.com]
+     * @Date: 2018/11/16
+     * @Time: 11:23
+     */
+    public static function mode4()
+    {
+        $last = Source::getLastOne();
+        // 计算4余
+        $remainder = $last->sum % 4;
+        $touzhu = self::getFive($remainder);
+        $sumMoney = self::getSumMoney($touzhu);
+        return [
+            'touzhu'=>$touzhu,
+            'sumMoney'=>$sumMoney
+        ];
+    }
+
+    /**
+     * @Notes: 获取杀5余的投注
+     * @Author: chenning[296720094@qq.com]
+     * @Date: 2018/11/16
+     * @Time: 12:58
+     * @param $remainder
+     */
+    public static function getFive($remainder)
+    {
+        $modeArr = [
+            '0'=>3,
+            '1'=>5,
+            '2'=>2,
+            '3'=>4,
+            '4'=>1
+        ];
+        $modeUrl = 'http://www.pceggs.com/play/pg28mode.aspx?mode=' . $modeArr[$remainder];
+        $modeData = self::$curl->get($modeUrl);
+        $touzhu = $modeData->response;
+        return $touzhu;
     }
 
     /**
@@ -96,10 +205,10 @@ class Mode
      */
     public static function getSumMoney($touzhu)
     {
-        $touzhuArr = explode(',',$touzhu);
+        $touzhuArr = explode(',', $touzhu);
         $sumMoney = 0;
-        foreach ($touzhuArr as &$v){
-            if($v){
+        foreach ($touzhuArr as &$v) {
+            if ($v) {
                 $sumMoney += $v;
             }
         }
