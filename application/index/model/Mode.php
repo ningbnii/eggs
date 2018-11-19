@@ -146,6 +146,15 @@ class Mode
         // 计算4余
         $remainder = $last->sum % 4;
         $touzhu = self::getFive($remainder);
+//        $touzhu2 = self::getFive2($remainder);
+//        $touzhuArr = explode(',',$touzhu);
+//        $touzhu2Arr = explode(',',$touzhu2);
+//        foreach ($touzhuArr as $k=>$v){
+//            if(!$v){
+//                $touzhuArr[$k] = $touzhu2Arr[$k];
+//            }
+//        }
+//        $touzhu = implode(',',$touzhuArr);
         $sumMoney = self::getSumMoney($touzhu);
         return [
             'touzhu'=>$touzhu,
@@ -176,6 +185,25 @@ class Mode
     }
 
     /**
+     * 5余
+     * @param $remainder
+     */
+    public static function getFive2($remainder)
+    {
+        $modeArr = [
+            '0'=>6,
+            '1'=>7,
+            '2'=>8,
+            '3'=>9,
+            '4'=>10
+        ];
+        $modeUrl = 'http://www.pceggs.com/play/pg28mode.aspx?mode=' . $modeArr[$remainder];
+        $modeData = self::$curl->get($modeUrl);
+        $touzhu = $modeData->response;
+        return $touzhu;
+    }
+
+    /**
      * @Notes: 获取组合投注模式
      * @Author: chenning[296720094@qq.com]
      * @Date: 2018/11/14
@@ -185,7 +213,7 @@ class Mode
     public static function getCombination($type)
     {
         $modeArr = [
-            '大单' => 1,
+            '大单' => 14,
             '小单' => 11,
             '大双' => 13,
             '小双' => 12,

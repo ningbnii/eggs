@@ -71,6 +71,9 @@
 
     $(function () {
         $('#start').click(function(){
+            $.get("{:url('index/index/caiji')}",function (data) {
+
+            });
             $.get("{:url('test/start')}", function(data) {
                 location.reload()
             });

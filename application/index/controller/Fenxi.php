@@ -9,6 +9,7 @@
 namespace app\index\controller;
 
 use app\index\model\Forecast;
+use app\index\model\Mode;
 use app\index\model\Source;
 use think\Db;
 use think\Request;
@@ -17,11 +18,11 @@ class Fenxi
 {
     public function index()
     {
-        $this->test2();
         $list = Db::name('forecast')->alias('f')
             ->field('s.periods,mode1,mode2,mode3,mode4')
             ->join('source s','s.id=f.source_id','left')
             ->order('f.id desc')
+            ->limit(100)
             ->select();
 
         return view('index',['list'=>$list,'switch'=>cache('switch'),'mode'=>cache('mode')]);
@@ -82,5 +83,16 @@ class Fenxi
             cache('mode',$mode);
         }
     }
+
+    public function test3()
+    {
+        $list = Source::getLastThreeRecord();
+        echo 'mode1：' . Mode::getMode1Type($list[0],$list[1],$list[2]) . '<br/>';
+        echo 'mode2：' . Mode::getMode2Type($list[0],$list[1],$list[2]) . '<br/>';
+        echo 'mode3：' . Mode::getMode3Type($list[0],$list[1],$list[2]) . '<br/>';
+
+    }
+
+
 
 }

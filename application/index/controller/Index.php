@@ -125,15 +125,37 @@ class Index
             $source = new Source($params);
             $source->save();
         }
+        $fenxi = new Fenxi();
+        $fenxi->test2();
+        // 如果最近连错两个，停止投注
+//        if(Forecast::getLastWrongTimes() == 2){
+//            cache('switch',false);
+//        }else{
+//            // 模式4如果错误，停止投注
+//            if(!Forecast::getLastStatus('mode4')){
+//                cache('switch',true);
+//                cache('times',0);
+//            }
+//        }
 
-        // 模式4如果错误，停止投注
-        if(!Forecast::getLastStatus('mode4')){
-            cache('switch',false);
-        }
+
+//        if(cache('times')>4){
+//            cache('switch',false);
+//        }else{
+//            cache('switch',true);
+//        }
+//        cache('switch',false);
         // 自动开奖
         $lid = substr(trim($data[0]['lid']), 13, 7);
         if (cache('lid') != $lid && cache('switch')) {
 
+//            if(!cache('times')){
+//                cache('times',1);
+//            }else{
+//                $times = cache('times');
+//                $times ++;
+//                cache('times',$times);
+//            }
             $modeFunc = 'mode' . cache('mode');
             if (method_exists(new Mode(), $modeFunc)) {
                 $modeData = Mode::$modeFunc();
@@ -152,317 +174,9 @@ class Index
                 $result = $curl->get('http://www.pceggs.com/play/pg28Insert_ajax.ashx?LID=' . $lid . '&' . http_build_query($arr));
                 if (json_decode($result->response)->status == 1) {
                     cache('lid', $lid);
-//                    cache('switch',false);
+                    cache('switch',false);
                 }
             }
-        }
-
-    }
-
-    /**
-     * 杀9尾模式
-     */
-    private function mode1($data, $curl, $lid)
-    {
-        $time = '2018-' . $data[0]['time'];
-        $modeArr = [14, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        $lastData = Source::order('id desc')->find();
-        $lastSeondData = Source::get($lastData->id - 1);
-        $lastDataWei = array_reverse(str_split($lastData->sum))[0];
-        $lastSeondDataWei = array_reverse(str_split($lastSeondData->sum))[0];
-        if ($lastDataWei + $lastSeondDataWei == 9) {
-            cache('right', null);
-        }
-        $shawei = 9 - array_reverse(str_split($lastData->sum))[0];
-        $modeUrl = 'http://www.pceggs.com/play/pg28mode.aspx?mode=' . $modeArr[$shawei];
-        $modeData = $curl->get($modeUrl);
-        $touzhu = $modeData->response;
-        $touzhuArr = explode(',', $touzhu);
-        $sumMoney = 0;
-        $right = cache('right') ? cache('right') : 0;
-        $rate = 1;
-        if ($right) {
-            $rate = pow(2, $right);
-        }
-        foreach ($touzhuArr as &$v) {
-            if ($v) {
-                if ($rate) {
-                    $v = intval($v / $rate);
-                }
-                $sumMoney += $v;
-            }
-        }
-        $touzhu = implode(',', $touzhuArr);
-        $curl->setHeader('Referer', 'http://www.pceggs.com/play/pg28Insert.aspx?LID=' . $lid);
-        $arr = [
-            'CTIME' => $time,
-            'ALLSMONEY' => $touzhu,
-            'isdb_p' => '0',
-            'SMONEYSUM' => $sumMoney,
-            'SMONEYY' => 'ALD',
-            'Cheat' => 'CAE',
-            '_' => time() * 1000,
-        ];
-
-        $result = $curl->get('http://www.pceggs.com/play/pg28Insert_ajax.ashx?LID=' . $lid . '&' . http_build_query($arr));
-        if (json_decode($result->response)->status == 1) {
-            cache('lid', $lid);
-            if (!cache('right')) {
-                $right = 1;
-                cache('right', $right);
-            } else {
-                $right = cache('right');
-                $right++;
-                if ($right > 4) {
-                    $right = 1;
-                }
-            }
-            cache('right', $right);
-        }
-    }
-
-    /**
-     * 算法模式2
-     * @param $data
-     * @param $curl
-     */
-    private function mode2($data, $curl, $lid)
-    {
-        $time = '2018-' . $data[0]['time'];
-        $modeArr = [
-            '大单' => 1,
-            '小单' => 11,
-            '大双' => 13,
-            '小双' => 12,
-        ];
-
-        $first = Source::order('id desc')->find();
-        $second = Source::get($first->id - 1);
-        $third = Source::get($first->id - 2);
-        $four = Source::get($first->id - 3);
-        $lastForecast = Source::getForecast($second, $third, $four);
-        // 上一次预测是不是正确，不正确再下注
-        $shiji = ch2arr(Source::getForecastType($first->sum));
-        $lastForecast = ch2arr($lastForecast);
-
-        $flag = false;
-        foreach ($shiji as $v) {
-            if (in_array($v, $lastForecast)) {
-                $flag = true;
-            }
-        }
-
-        if (!$flag) {
-            $forecast = Source::getForecast($first, $second, $third);
-            $modeUrl = 'http://www.pceggs.com/play/pg28mode.aspx?mode=' . $modeArr[$forecast];
-            $modeData = $curl->get($modeUrl);
-            $touzhu = $modeData->response;
-            $touzhuArr = explode(',', $touzhu);
-            $sumMoney = 0;
-            foreach ($touzhuArr as &$v) {
-                if ($v) {
-                    $sumMoney += $v;
-                }
-            }
-            $touzhu = implode(',', $touzhuArr);
-            $curl->setHeader('Referer', 'http://www.pceggs.com/play/pg28Insert.aspx?LID=' . $lid);
-            $arr = [
-                'CTIME' => $time,
-                'ALLSMONEY' => $touzhu,
-                'isdb_p' => '0',
-                'SMONEYSUM' => $sumMoney,
-                'SMONEYY' => 'ALD',
-                'Cheat' => 'CAE',
-                '_' => time() * 1000,
-            ];
-
-            $result = $curl->get('http://www.pceggs.com/play/pg28Insert_ajax.ashx?LID=' . $lid . '&' . http_build_query($arr));
-            if (json_decode($result->response)->status == 1) {
-                cache('lid', $lid);
-            }
-        }
-
-    }
-
-    /**
-     * 算法模式3 连投3个，暂停，等错了，再开始投
-     * @param $data
-     * @param $curl
-     */
-    private function mode3($data, $curl, $lid)
-    {
-        cache('mode', 3);
-        $time = '2018-' . $data[0]['time'];
-        $modeArr = [
-            '大单' => 1,
-            '小单' => 11,
-            '大双' => 13,
-            '小双' => 12,
-        ];
-
-        $first = Source::order('id desc')->find();
-        $second = Source::get($first->id - 1);
-        $third = Source::get($first->id - 2);
-        $four = Source::get($first->id - 3);
-        $lastForecast = Source::getForecast($second, $third, $four);
-        // 上一次预测是不是正确，不正确再下注
-        $shiji = ch2arr(Source::getForecastType($first->sum));
-        $lastForecast = ch2arr($lastForecast);
-
-        // 上次没猜中
-        $flag = false;
-        foreach ($shiji as $v) {
-            if (in_array($v, $lastForecast)) {
-                $flag = true; // 上次猜中了
-            }
-        }
-        $times = cache('times') ? cache('times') : 0;
-
-        if (!$flag || $times < 30) {
-
-            $forecast = Source::getForecast($first, $second, $third);
-            $modeUrl = 'http://www.pceggs.com/play/pg28mode.aspx?mode=' . $modeArr[$forecast];
-            $modeData = $curl->get($modeUrl);
-            $touzhu = $modeData->response;
-            $touzhuArr = explode(',', $touzhu);
-            $sumMoney = 0;
-            foreach ($touzhuArr as &$v) {
-                if ($v) {
-                    $sumMoney += $v;
-                }
-            }
-            $touzhu = implode(',', $touzhuArr);
-            $curl->setHeader('Referer', 'http://www.pceggs.com/play/pg28Insert.aspx?LID=' . $lid);
-            $arr = [
-                'CTIME' => $time,
-                'ALLSMONEY' => $touzhu,
-                'isdb_p' => '0',
-                'SMONEYSUM' => $sumMoney,
-                'SMONEYY' => 'ALD',
-                'Cheat' => 'CAE',
-                '_' => time() * 1000,
-            ];
-
-            $result = $curl->get('http://www.pceggs.com/play/pg28Insert_ajax.ashx?LID=' . $lid . '&' . http_build_query($arr));
-
-            if (json_decode($result->response)->status == 1) {
-                cache('lid', $lid);
-
-                $times++;
-                cache('times', $times);
-            }
-        }
-        if (!$flag) {
-            cache('times', 0);
-        }
-
-    }
-
-    /**
-     * 算法模式3 连投3个，暂停，等错了，再开始投
-     * @param $data
-     * @param $curl
-     */
-    private function mode4($data, $curl, $lid)
-    {
-        cache('mode', 4);
-        $time = '2018-' . $data[0]['time'];
-        $modeArr = [
-            '大单' => 1,
-            '小单' => 11,
-            '大双' => 13,
-            '小双' => 12,
-        ];
-
-        $first = Source::order('id desc')->find();
-        $second = Source::get($first->id - 1);
-        $third = Source::get($first->id - 2);
-        $four = Source::get($first->id - 3);
-        $lastForecast = $second->num1 * 100 + $third->num1 * 10 + $four->num1 + $second->num3 * 10 + $third->num2 - $four->num2;
-        $lastForecast = str_split($lastForecast);
-        $lastTotal = 0;
-        foreach ($lastForecast as $v) {
-            $lastTotal += $v;
-        }
-        $lastForecast = Source::getForecastType($lastTotal);
-        if ($lastForecast == '大单') {
-            $lastForecast = '小双';
-        }
-        if ($lastForecast == '小单') {
-            $lastForecast = '大双';
-        }
-        if ($lastForecast == '大双') {
-            $lastForecast = '小单';
-        }
-        if ($lastForecast == '小双') {
-            $lastForecast = '大单';
-        }
-        // 上一次预测是不是正确，不正确再下注
-        $shiji = ch2arr(Source::getForecastType($first->sum));
-        $lastForecast = ch2arr($lastForecast);
-
-        // 上次没猜中
-        $flag = false;
-        foreach ($shiji as $v) {
-            if (in_array($v, $lastForecast)) {
-                $flag = true; // 上次猜中了
-            }
-        }
-        $times = cache('times') ? cache('times') : 0;
-
-        if ($flag && $times < 3) {
-            $forecast = $first->num1 * 100 + $second->num1 * 10 + $third->num1 + $first->num3 * 10 + $second->num2 - $third->num2;
-            $forecast = str_split($forecast);
-            $lastTotal = 0;
-            foreach ($forecast as $v) {
-                $lastTotal += $v;
-            }
-            $forecast = Source::getForecastType($lastTotal);
-            if ($forecast == '大单') {
-                $forecast = '小双';
-            }
-            if ($forecast == '小单') {
-                $forecast = '大双';
-            }
-            if ($forecast == '大双') {
-                $forecast = '小单';
-            }
-            if ($forecast == '小双') {
-                $forecast = '大单';
-            }
-            $modeUrl = 'http://www.pceggs.com/play/pg28mode.aspx?mode=' . $modeArr[$forecast];
-            $modeData = $curl->get($modeUrl);
-            $touzhu = $modeData->response;
-            $touzhuArr = explode(',', $touzhu);
-            $sumMoney = 0;
-            foreach ($touzhuArr as &$v) {
-                if ($v) {
-                    $sumMoney += $v;
-                }
-            }
-            $touzhu = implode(',', $touzhuArr);
-            $curl->setHeader('Referer', 'http://www.pceggs.com/play/pg28Insert.aspx?LID=' . $lid);
-            $arr = [
-                'CTIME' => $time,
-                'ALLSMONEY' => $touzhu,
-                'isdb_p' => '0',
-                'SMONEYSUM' => $sumMoney,
-                'SMONEYY' => 'ALD',
-                'Cheat' => 'CAE',
-                '_' => time() * 1000,
-            ];
-
-            $result = $curl->get('http://www.pceggs.com/play/pg28Insert_ajax.ashx?LID=' . $lid . '&' . http_build_query($arr));
-            if (json_decode($result->response)->status == 1) {
-                cache('lid', $lid);
-
-                $times++;
-                cache('times', $times);
-            }
-        }
-        if (!$flag) {
-            cache('mode', 3);
-            cache('times', 0);
         }
 
     }

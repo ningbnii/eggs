@@ -93,4 +93,16 @@ class Forecast extends Model
         $data = self::order('id desc')->find();
         return $data->$mode;
     }
+
+    public static function getLastWrongTimes()
+    {
+        $list = self::order('id desc')->limit(2)->select();
+        $wrong = 0;
+        foreach ($list as $v){
+            if($v->mode4 == 0){
+                $wrong ++;
+            }
+        }
+        return $wrong;
+    }
 }
